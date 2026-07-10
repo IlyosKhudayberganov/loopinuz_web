@@ -368,7 +368,7 @@ export default class PopupStars extends PopupElement {
       overlayClosable: true,
       floatingHeader: true,
       body: true,
-      title: 'TelegramStars',
+      title: 'LoopinuzStars',
       scrollable: true
     });
 
@@ -527,7 +527,7 @@ export default class PopupStars extends PopupElement {
         title = i18n('StarsNeededTitle', [starsNeeded().toJSNumber()]);
       }
     } else {
-      title = i18n('TelegramStars');
+      title = i18n('LoopinuzStars');
     }
 
     let subtitle: JSX.Element;
@@ -561,7 +561,7 @@ export default class PopupStars extends PopupElement {
     } else if(this.itemPrice) {
       subtitle = i18n(this.paymentForm ? 'StarsNeededText' : 'Stars.Subscribe.Need', [peerTitle]);
     } else {
-      subtitle = i18n('TelegramStarsInfo');
+      subtitle = i18n('LoopinuzStarsInfo');
     }
 
     const firstSection = (
@@ -779,7 +779,7 @@ export default class PopupStars extends PopupElement {
           <Section>
             <Button
               class="btn-primary btn-transparent primary"
-              text="TelegramStarsGift"
+              text="LoopinuzStarsGift"
               onClick={async() => {
                 this.hide();
                 const peerId = await showContactPickerPopup();

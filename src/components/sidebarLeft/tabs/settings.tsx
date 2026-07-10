@@ -271,7 +271,7 @@ const Settings = () => {
             <Row clickable={() => PopupElement.createPopup(PopupStars)}>
               <Row.Icon icon="star" class="row-icon-stars-color" />
               <Row.Title titleRight={'' + stars()} titleRightSecondary>
-                {i18n('MenuTelegramStars')}
+                {i18n('MenuLoopinuzStars')}
               </Row.Title>
             </Row>
           </Show>
@@ -279,7 +279,7 @@ const Settings = () => {
             <Row clickable={() => PopupElement.createPopup(PopupStars, {ton: true})}>
               <Row.Icon icon="ton" />
               <Row.Title titleRight={formatNanoton(starsTon())} titleRightSecondary>
-                {i18n('MenuTelegramStarsTon')}
+                {i18n('MenuLoopinuzStarsTon')}
               </Row.Title>
             </Row>
           </Show>

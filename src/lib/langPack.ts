@@ -36,7 +36,7 @@ export const langPack: {[actionType: string]: LangPackKey} = {
   'messageActionChatDeleteUser': 'ActionKickUser',
   'messageActionChatJoinedByLink': 'ActionInviteUser',
   'messageActionPinMessage': 'Chat.Service.Group.UpdatedPinnedMessage',
-  'messageActionContactSignUp': 'Chat.Service.PeerJoinedTelegram',
+  'messageActionContactSignUp': 'Chat.Service.PeerJoinedLoopinuz',
   'messageActionChannelCreate': 'ActionCreateChannel',
   'messageActionChannelEditTitle': 'Chat.Service.Channel.UpdatedTitle',
   'messageActionChannelEditPhoto': 'Chat.Service.Channel.UpdatedPhoto',

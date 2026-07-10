@@ -925,9 +925,9 @@ export class AppSidebarLeft extends SidebarSlider {
       verify: () => App.isMainDomain
     }, {
       icon: 'help',
-      text: 'TelegramFeatures',
+      text: 'LoopinuzFeatures',
       onClick: () => {
-        const url = I18n.format('TelegramFeaturesUrl', true);
+        const url = I18n.format('LoopinuzFeaturesUrl', true);
         appImManager.openUrl(url);
       },
       separator: !App.isMainDomain

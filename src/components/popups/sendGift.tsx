@@ -96,7 +96,7 @@ function GiftOptionsPage(props: {
       </div>
       <div class={styles.mainSubtitle}>
         <I18nTsx
-          key="GiftTelegramPremiumDescription"
+          key="GiftLoopinuzPremiumDescription"
           args={<PeerTitleTsx peerId={props.peerId} onlyFirstName={props.peer._ === 'user'} />}
         />
       </div>
