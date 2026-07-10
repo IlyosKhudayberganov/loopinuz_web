@@ -14,7 +14,8 @@ const FILES = [
 ];
 
 const DIRS = [
-  path.join('assets', 'fonts')
+  path.join('assets', 'fonts'),
+  path.join('assets', 'img')
 ];
 
 for (const dir of DIRS) {
