@@ -244,7 +244,7 @@ export default function SignInCard(_props: {spec: Spec}) {
             size={120}
             element={
               <svg class={styles.logo} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
-                <use href="#logo"/>
+                <image href="assets/img/favicon.ico" width="160" height="160" />
               </svg>
             }
           />
