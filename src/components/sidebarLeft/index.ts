@@ -99,6 +99,7 @@ import useHasFoldersSidebar, {
 import isObject from '@helpers/object/isObject';
 import {useAppSettings} from '@stores/appSettings';
 import {openEmojiStatusPicker} from '@components/sidebarLeft/emojiStatusPicker';
+import CheckboxField from '@components/checkboxField';
 
 export const LEFT_COLUMN_ACTIVE_CLASSNAME = 'is-left-column-shown';
 
@@ -643,75 +644,90 @@ export class AppSidebarLeft extends SidebarSlider {
       clb();
     }
 
-    const btnArchive: typeof menuButtons[0] = {
-      icon: 'archive',
-      text: 'ArchivedChats',
-      onClick: () => {
-        this.openArchiveTab();
-      },
-      verify: async() => {
-        const folder = await this.managers.dialogsStorage.getFolderDialogs(FOLDER_ID_ARCHIVE, false);
-        const hasArchiveStories = await this.managers.appStoriesManager.hasArchive();
-        return !!folder.length || hasArchiveStories || !(await this.managers.dialogsStorage.isDialogsLoaded(FOLDER_ID_ARCHIVE));
-      }
-    };
-
     const onContactsClick = () => {
       closeTabsBefore(() => {
         this.createTab(AppContactsTab).open();
       });
     };
 
-    const moreSubmenu = createSubmenuTrigger({
-      options: {
-        text: 'MultiAccount.More',
-        icon: 'more'
-      },
-      createSubmenu: (args) => this.createMoreSubmenu(args, closeTabsBefore)
-    });
+    const darkModeCheckboxField = new CheckboxField({toggle: true, checked: themeController.isNight()});
+    const darkModeTextEl = document.createElement('span');
+    darkModeTextEl.append(i18n(themeController.isNight() ? 'DisableDarkMode' : 'EnableDarkMode'));
 
-    const newSubmenu = createSubmenuTrigger({
-      options: {
-        text: 'CreateANew',
-        icon: 'edit',
-        verify: () => this.isCollapsed(),
-        separator: true
-      },
-      createSubmenu: () => this.createNewChatsSubmenu()
-    });
+    const darkModeOption: ButtonMenuItemOptions & {verify?: () => boolean | Promise<boolean>} = {
+      icon: 'darkmode',
+      regularText: darkModeTextEl,
+      checkboxField: darkModeCheckboxField,
+      noCheckboxClickListener: true,
+      keepOpen: true,
+      onClick: () => {
+        const icon = darkModeOption.element?.querySelector('.tgico') as HTMLElement;
+        const rect = icon.getBoundingClientRect();
+        themeController.switchTheme(undefined, {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        });
+        pause(20).then(() => {
+          const isNight = themeController.isNight();
+          darkModeTextEl.replaceChildren(i18n(isNight ? 'DisableDarkMode' : 'EnableDarkMode'));
+          darkModeCheckboxField.checked = isNight;
+        });
+      }
+    };
 
     const menuButtons: (ButtonMenuItemOptions & {verify?: () => boolean | Promise<boolean>})[] = [{
-      icon: 'plus',
-      text: 'MultiAccount.AddAccount',
-      onClick: this.addAccount,
-      verify: async() => {
-        const totalAccounts = await AccountController.getTotalAccounts();
-        return totalAccounts < MAX_ACCOUNTS;
+      icon: 'user',
+      text: 'MyProfile' as any,
+      onClick: () => {
+        closeTabsBefore(() => {
+          this.createTab(AppSettingsTab).open();
+        });
       }
-    }, newSubmenu, {
+    }, {
+      icon: 'card',
+      text: 'Wallet' as any,
+      separator: true,
+      onClick: () => {
+        appImManager.openUrl('https://wallet.telegram.org/');
+      }
+    }, {
+      icon: 'newgroup',
+      text: 'NewGroup',
+      onClick: () => {
+        closeTabsBefore(() => {
+          createNewGroupTab(this);
+        });
+      }
+    }, {
+      icon: 'newchannel',
+      text: 'NewChannel',
+      onClick: () => {
+        closeTabsBefore(() => {
+          this.createTab(AppNewChannelTab).open();
+        });
+      }
+    }, {
+      icon: 'user',
+      text: 'Contacts',
+      separator: true,
+      onClick: onContactsClick
+    }, {
+      icon: 'phone',
+      text: 'Calls' as any,
+      onClick: () => {
+        appImManager.openUrl('https://web.telegram.org/');
+      }
+    }, {
       icon: 'savedmessages',
       text: 'SavedMessages',
+      separator: true,
       onClick: () => {
-        setTimeout(() => { // menu doesn't close if no timeout (lol)
+        setTimeout(() => {
           appImManager.setPeer({
             peerId: appImManager.myId
           });
         }, 0);
-      },
-      separator: true
-    }, btnArchive, {
-      icon: 'stories',
-      text: 'MyStories.Title',
-      onClick: () => {
-        closeTabsBefore(() => {
-          this.createTab(AppMyStoriesTab).open(AppMyStoriesTab.getInitArgs());
-        });
-      },
-      verify: () => !TEST_NO_STORIES
-    }, {
-      icon: 'user',
-      text: 'Contacts',
-      onClick: onContactsClick
+      }
     }, {
       id: 'settings',
       icon: 'settings',
@@ -722,7 +738,7 @@ export class AppSidebarLeft extends SidebarSlider {
           this.createTab(AppSettingsTab).open();
         });
       }
-    }, moreSubmenu];
+    }, darkModeOption];
 
     const filteredButtons = menuButtons.filter(Boolean);
     const filteredButtonsSliced = filteredButtons.slice();
@@ -772,9 +788,11 @@ export class AppSidebarLeft extends SidebarSlider {
         }
 
         const targetIdx = buttons.findIndex((btn) => btn.id === 'settings');
-        buttons[targetIdx].separator = !!attachMenuBotsButtons.length;
-        buttons.splice(targetIdx, 0, ...attachMenuBotsButtons);
-        buttons[targetIdx].separator = true;
+        if(targetIdx !== -1) {
+          buttons[targetIdx].separator = !!attachMenuBotsButtons.length;
+          buttons.splice(targetIdx, 0, ...attachMenuBotsButtons);
+          buttons[targetIdx].separator = true;
+        }
 
         const [totalAccounts, notificationsCount] = await Promise.all([
           AccountController.getTotalAccounts(),
@@ -840,19 +858,27 @@ export class AppSidebarLeft extends SidebarSlider {
           }
         }
 
+        const addAccountButton: typeof buttons[0] = {
+          icon: 'add',
+          text: 'MultiAccount.AddAccount',
+          onClick: this.addAccount,
+          separator: true,
+          verify: async() => {
+            const totalAccounts = await AccountController.getTotalAccounts();
+            return totalAccounts < MAX_ACCOUNTS;
+          }
+        };
+
+        accountButtons.push(addAccountButton);
+
         buttons.splice(0, 0, ...accountButtons);
 
         filteredButtons.splice(0, filteredButtons.length, ...buttons);
       },
-      onOpen: () => {
-        moreSubmenu.onOpen();
-        newSubmenu.onOpen();
-        btnArchive.element?.append(this.archivedCount);
+      onOpen: (e, element) => {
+        element.append(getVersionLink());
       },
-      onClose: () => {
-        moreSubmenu.onClose();
-        newSubmenu.onClose();
-      },
+      onClose: () => {},
       noIcon: true
     });
 
