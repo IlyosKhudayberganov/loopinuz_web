@@ -100,7 +100,7 @@ import isObject from '@helpers/object/isObject';
 import {useAppSettings} from '@stores/appSettings';
 import {openEmojiStatusPicker} from '@components/sidebarLeft/emojiStatusPicker';
 import CheckboxField from '@components/checkboxField';
-import {createAIAssistantPanel} from '@components/aiAssistant';
+
 
 export const LEFT_COLUMN_ACTIVE_CLASSNAME = 'is-left-column-shown';
 
@@ -690,18 +690,6 @@ export class AppSidebarLeft extends SidebarSlider {
       separator: true,
       onClick: () => {
         appImManager.openUrl('https://wallet.telegram.org/');
-      }
-    }, {
-      icon: 'bot_filled',
-      text: 'Loopinuz AI' as any,
-      onClick: () => {
-        const overlay = document.createElement('div');
-        overlay.classList.add('ai-assistant-overlay');
-        overlay.append(createAIAssistantPanel());
-        document.body.append(overlay);
-        overlay.addEventListener('click', (e) => {
-          if(e.target === overlay) overlay.remove();
-        });
       }
     }, {
       icon: 'newgroup',
