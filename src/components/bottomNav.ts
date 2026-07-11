@@ -3,6 +3,7 @@ import ripple from '@components/ripple';
 import {attachClickEvent} from '@helpers/dom/clickEvent';
 import mediaSizes from '@helpers/mediaSizes';
 import {createAIAssistantPanel} from '@components/aiAssistant';
+import {getIconContent} from '@components/icon';
 
 export type BottomNavTab = 'chats' | 'contacts' | 'settings' | 'profile' | 'ai';
 
@@ -51,7 +52,8 @@ class BottomNav {
         this.avatarContainers.set(tab.id, avatarContainer);
       } else {
         const icon = document.createElement('i');
-        icon.classList.add('tgico', `tgico-${tab.icon}`, 'bottom-nav-icon');
+        icon.classList.add('tgico', 'bottom-nav-icon');
+        icon.textContent = getIconContent(tab.icon as Icon);
         btn.append(icon);
       }
 
