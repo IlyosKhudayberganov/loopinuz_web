@@ -1,9 +1,9 @@
 import rootScope from '@lib/rootScope';
 import appImManager from '@lib/appImManager';
-import {i18n} from '@lib/langPack';
 import {attachClickEvent} from '@helpers/dom/clickEvent';
-import Icon from '@components/icon';
-import pause from '@helpers/schedulers/pause';
+import {getIconContent} from '@components/icon';
+import appDialogsManager from '@lib/appDialogsManager';
+import apiManagerProxy from '@lib/apiManagerProxy';
 
 type ChatMessage = {
   role: 'user' | 'assistant';
@@ -15,39 +15,59 @@ type GatheredContext = {
   messages: string;
 }[];
 
-async function gatherRecentMessages(limit = 5): Promise<GatheredContext> {
-  const managers = rootScope.managers;
-  const result: GatheredContext = [];
+function getTopDialogPeerIds(limit = 8): PeerId[] {
+  const peerIds: PeerId[] = [];
+  const elements = document.querySelectorAll<HTMLElement>('[data-peer-id]');
+  const seen = new Set<string>();
 
-  const dialogElements = document.querySelectorAll<HTMLElement>('.chatlist-peer');
-
-  for(const el of Array.from(dialogElements).slice(0, limit * 2)) {
-    if(result.length >= limit) break;
+  for(const el of Array.from(elements)) {
+    if(peerIds.length >= limit) break;
 
     const peerIdStr = el.dataset.peerId;
-    if(!peerIdStr) continue;
+    if(!peerIdStr || seen.has(peerIdStr)) continue;
 
-    const peerId = Number(peerIdStr) as any;
+    const peerId = Number(peerIdStr);
     if(!peerId || peerId === (rootScope.myId as any)) continue;
 
+    seen.add(peerIdStr);
+    peerIds.push(peerId as PeerId);
+  }
+
+  return peerIds;
+}
+
+async function gatherRecentMessages(limit = 8): Promise<GatheredContext> {
+  const managers = rootScope.managers;
+  const result: GatheredContext = [];
+  const peerIds = getTopDialogPeerIds(limit);
+
+  for(const peerId of peerIds) {
     try {
       const history = await managers.appMessagesManager.getHistory({
         peerId,
-        limit: 20
+        limit: 30
       });
 
-      if(!history?.messages?.length) continue;
+      if(!history?.history?.length) continue;
 
       const peer = managers.appPeersManager.getPeer(peerId);
-      const peerTitle = (peer as any)?.title || (peer as any)?.first_name || 'Unknown';
+      let peerTitle = 'Unknown';
+      if((peer as any)?.title) peerTitle = (peer as any).title;
+      else if((peer as any)?.first_name) {
+        peerTitle = (peer as any).first_name;
+        if((peer as any)?.last_name) peerTitle += ' ' + (peer as any).last_name;
+      }
+
       const messageTexts: string[] = [];
 
-      for(const msg of history.messages) {
-        const message = (msg as any).message || '';
-        if(typeof message === 'string' && message.trim()) {
-          const date = new Date(((msg as any).date || 0) * 1000);
-          const dateStr = date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
-          messageTexts.push(`[${dateStr}] ${message}`);
+      for(const msg of history.history) {
+        const m = msg as any;
+        const text = m.message || m.messageText || '';
+        if(typeof text === 'string' && text.trim()) {
+          const date = new Date((m.date || 0) * 1000);
+          const dateStr = date.toLocaleDateString('uz-UZ', {month: 'short', day: 'numeric'});
+          const sender = m.fromId === rootScope.myId ? 'Men' : peerTitle;
+          messageTexts.push(`[${dateStr}] ${sender}: ${text}`);
         }
       }
 
@@ -71,7 +91,7 @@ function buildContextMessages(context: GatheredContext): ChatMessage[] {
   for(const chat of context) {
     messages.push({
       role: 'user' as const,
-      content: `Chat with "${chat.peerName}":\n${chat.messages}`
+      content: `Chat "${chat.peerName}" xabarlari:\n${chat.messages}`
     });
   }
 
@@ -81,9 +101,12 @@ function buildContextMessages(context: GatheredContext): ChatMessage[] {
 async function queryMistral(query: string, context: GatheredContext): Promise<string> {
   const contextMessages = buildContextMessages(context);
 
-  const contextText = contextMessages.map((m) => m.content).join('\n\n---\n\n');
+  let contextText = '';
+  for(const chat of context) {
+    contextText += `\n--- ${chat.peerName} ---\n${chat.messages}\n`;
+  }
 
-  const fullQuery = `Based on these recent chats:\n\n${contextText}\n\nQuestion: ${query}`;
+  const fullQuery = `Sizga foydalanuvchining Telegram chatlari berilgan. Quyidagi xabarlarni tahlil qiling va savolga javob bering.\n\nChatlar:${contextText}\n\nSavol: ${query}`;
 
   try {
     const response = await fetch('/api/ai', {
@@ -95,15 +118,21 @@ async function queryMistral(query: string, context: GatheredContext): Promise<st
       })
     });
 
-    const data = await response.json();
-
-    if(data.error) {
-      return `Error: ${data.error}`;
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch(e) {
+      return `API xatosi: Server noto'g'ri javob qaytardi. Status: ${response.status}`;
     }
 
-    return data.reply || 'No response from AI.';
+    if(data.error) {
+      return `Xato: ${data.error}`;
+    }
+
+    return data.reply || 'Javob olinmadi.';
   } catch(e) {
-    return `Connection error: ${(e as Error).message}`;
+    return `Ulanish xatosi: ${(e as Error).message}. Server ishlamayapti yoki /api/ai endpoint topilmadi.`;
   }
 }
 
@@ -142,7 +171,7 @@ export function createAIAssistantPanel() {
   const inputEl = document.createElement('input');
   inputEl.classList.add('ai-assistant-input');
   inputEl.type = 'text';
-  inputEl.placeholder = 'Ask about your chats...';
+  inputEl.placeholder = 'Chatlaringiz haqida biror narsa so\'rang...';
 
   const sendBtn = document.createElement('button');
   sendBtn.classList.add('ai-assistant-send', 'btn-icon');
@@ -180,13 +209,24 @@ export function createAIAssistantPanel() {
     const typing = addTypingIndicator();
 
     try {
-      const context = await gatherRecentMessages(5);
-      const reply = await queryMistral(query, context);
-      typing.remove();
-      addMessage(reply, 'assistant');
+      addMessage('Chatlaringizdan xabarlar yig\'ilmoqda...', 'assistant');
+
+      const context = await gatherRecentMessages(8);
+
+      if(!context.length) {
+        typing.remove();
+        addMessage('Chatlaringizdan xabarlar topilmadi. Iltimos, avval birorta chatni oching va xabarlar yuklanishini kuting.', 'assistant');
+      } else {
+        typing.remove();
+        const chatNames = context.map((c) => c.peerName).join(', ');
+        addMessage(`${context.length} ta chat topildi: ${chatNames}. So'rov yuborilmoqda...`, 'assistant');
+
+        const reply = await queryMistral(query, context);
+        addMessage(reply, 'assistant');
+      }
     } catch(e) {
       typing.remove();
-      addMessage(`Error: ${(e as Error).message}`, 'assistant');
+      addMessage(`Xato: ${(e as Error).message}`, 'assistant');
     } finally {
       inputEl.disabled = false;
       sendBtn.style.pointerEvents = '';
@@ -206,7 +246,7 @@ export function createAIAssistantPanel() {
     }
   });
 
-  addMessage('Hello! I can help you search through your Telegram chats. Ask me anything about your recent conversations.', 'assistant');
+  addMessage('Salom! Men sizning Telegram chatlaringizni tahlil qila olaman. Chatlaringiz haqida istalgan narsa so\'rang.\n\nMasalan: "Akam bilan nima haqida yozishdik?" yoki "Kim menga salom yozdi?"', 'assistant');
 
   return container;
 }

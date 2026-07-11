@@ -32,11 +32,12 @@ app.post('/api/ai', async(req, res) => {
   try {
     const {messages, query} = req.body;
 
-    const systemMessage = `You are a helpful AI assistant for a Telegram web client called Loopinuz. 
-The user has provided you with their recent chat messages as context. 
-Answer their question based on the provided chat context. 
-Be concise and helpful. If the context doesn't contain relevant information, say so.
-Always respond in the same language as the user's query.`;
+    const systemMessage = `Sen Telegram web client (Loopinuz) uchun AI yordamchisan.
+Foydalanuvchi o'zining Telegram chat xabarlarini taqdim etdi.
+Xabarlarni tahlil qiling va savolga javob bering.
+Qisqa va aniq javob bering. Agar kontekstda tegishli ma'lumot bo'lmasa, "bu haqida ma'lumot topilmadi" deb ayting.
+Javobni foydalanuvchi tilida bering (o'zbek yoki rus tili).
+Xabarlardan kim nima yozganini, qachon yozganini tahlil qiling.`;
 
     const apiMessages = [
       {role: 'system', content: systemMessage},
