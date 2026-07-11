@@ -1,14 +1,6 @@
 import {IS_MOBILE} from '@environment/userAgent';
-import appSidebarLeft from '@components/sidebarLeft';
-import {AppContactsTab} from '@components/solidJsTabs/tabs';
-import {AppSettingsTab} from '@components/solidJsTabs/tabs';
-import rootScope from '@lib/rootScope';
-import uiNotificationsManager from '@lib/uiNotificationsManager';
-import {attachClickEvent} from '@helpers/dom/clickEvent';
-import {getCurrentAccount} from '@lib/accounts/getCurrentAccount';
 import ripple from '@components/ripple';
-import {LEFT_COLUMN_ACTIVE_CLASSNAME} from '@components/sidebarLeft';
-import {RIGHT_COLUMN_ACTIVE_CLASSNAME} from '@components/sidebarRight';
+import {attachClickEvent} from '@helpers/dom/clickEvent';
 import mediaSizes from '@helpers/mediaSizes';
 
 export type BottomNavTab = 'chats' | 'contacts' | 'settings' | 'profile';
@@ -81,28 +73,36 @@ class BottomNav {
     });
   }
 
-  private onTabClick(tabId: BottomNavTab) {
+  private async onTabClick(tabId: BottomNavTab) {
     if(this.activeTab === tabId && tabId === 'chats') return;
 
     this.setActive(tabId);
 
+    const {default: appSidebarLeft} = await import('@components/sidebarLeft');
+    const {LEFT_COLUMN_ACTIVE_CLASSNAME} = await import('@components/sidebarLeft');
+    const {RIGHT_COLUMN_ACTIVE_CLASSNAME} = await import('@components/sidebarRight');
+
     switch(tabId) {
       case 'chats':
-        this.showChats();
+        this.showChats(appSidebarLeft, LEFT_COLUMN_ACTIVE_CLASSNAME, RIGHT_COLUMN_ACTIVE_CLASSNAME);
         break;
       case 'contacts':
-        this.showContacts();
+        this.showContacts(appSidebarLeft, LEFT_COLUMN_ACTIVE_CLASSNAME);
         break;
       case 'settings':
-        this.showSettings();
+        this.showSettings(appSidebarLeft, LEFT_COLUMN_ACTIVE_CLASSNAME);
         break;
       case 'profile':
-        this.showProfile();
+        this.showSettings(appSidebarLeft, LEFT_COLUMN_ACTIVE_CLASSNAME);
         break;
     }
   }
 
-  private showChats() {
+  private showChats(
+    appSidebarLeft: any,
+    LEFT_COLUMN_ACTIVE_CLASSNAME: string,
+    RIGHT_COLUMN_ACTIVE_CLASSNAME: string
+  ) {
     const hasOpenTabs = appSidebarLeft.hasSomethingOpenInside();
     if(hasOpenTabs) {
       appSidebarLeft.closeEverythingInside();
@@ -118,30 +118,26 @@ class BottomNav {
     }
   }
 
-  private showContacts() {
-    this.ensureLeftColumnVisible();
+  private async showContacts(appSidebarLeft: any, LEFT_COLUMN_ACTIVE_CLASSNAME: string) {
+    if(!document.body.classList.contains(LEFT_COLUMN_ACTIVE_CLASSNAME)) {
+      document.body.classList.add(LEFT_COLUMN_ACTIVE_CLASSNAME);
+    }
     appSidebarLeft.closeEverythingInside();
+    const {AppContactsTab} = await import('@components/solidJsTabs/tabs');
     setTimeout(() => {
       appSidebarLeft.createTab(AppContactsTab).open();
     }, 50);
   }
 
-  private showSettings() {
-    this.ensureLeftColumnVisible();
-    appSidebarLeft.closeEverythingInside();
-    setTimeout(() => {
-      appSidebarLeft.createTab(AppSettingsTab).open();
-    }, 50);
-  }
-
-  private showProfile() {
-    this.showSettings();
-  }
-
-  private ensureLeftColumnVisible() {
+  private async showSettings(appSidebarLeft: any, LEFT_COLUMN_ACTIVE_CLASSNAME: string) {
     if(!document.body.classList.contains(LEFT_COLUMN_ACTIVE_CLASSNAME)) {
       document.body.classList.add(LEFT_COLUMN_ACTIVE_CLASSNAME);
     }
+    appSidebarLeft.closeEverythingInside();
+    const {AppSettingsTab} = await import('@components/solidJsTabs/tabs');
+    setTimeout(() => {
+      appSidebarLeft.createTab(AppSettingsTab).open();
+    }, 50);
   }
 
   private onResize() {
@@ -180,16 +176,24 @@ class BottomNav {
   }
 
   private listenNotifications() {
-    rootScope.addEventListener('notification_count_update', async() => {
-      const notificationsCount = await uiNotificationsManager.getNotificationsCountForAllAccounts();
-      const count = Object.entries(notificationsCount).reduce(
-        (prev, [accountNumber, count]) =>
-          prev +
-          (+accountNumber !== getCurrentAccount() ? count || 0 : 0)
-        , 0);
+    const init = async() => {
+      const {default: rootScope} = await import('@lib/rootScope');
+      const {default: uiNotificationsManager} = await import('@lib/uiNotificationsManager');
+      const {getCurrentAccount} = await import('@lib/accounts/getCurrentAccount');
 
-      this.updateBadge('chats', count);
-    });
+      rootScope.addEventListener('notification_count_update', async() => {
+        const notificationsCount = await uiNotificationsManager.getNotificationsCountForAllAccounts();
+        const count = Object.entries(notificationsCount).reduce(
+          (prev, [accountNumber, count]) =>
+            prev +
+            (+accountNumber !== getCurrentAccount() ? count || 0 : 0)
+          , 0);
+
+        this.updateBadge('chats', count);
+      });
+    };
+
+    init();
   }
 }
 

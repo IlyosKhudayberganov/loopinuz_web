@@ -3,7 +3,6 @@ import loadFonts from '@helpers/dom/loadFonts';
 import {doubleRaf} from '@helpers/schedulers';
 import isNativeVoiceRecorderSupported from '@helpers/voiceRecorder/isNativeSupported';
 import rootScope from '@lib/rootScope';
-import bottomNav from '@components/bottomNav';
 
 import {disposeActiveAuthFlow} from '@/pages/mountAuthFlow';
 
@@ -61,7 +60,9 @@ export async function bootstrapIm(): Promise<void> {
   await doubleRaf();
   document.body.classList.remove('has-auth-pages');
 
-  bottomNav.init();
+  import('@components/bottomNav').then(({default: bottomNav}) => {
+    bottomNav.init();
+  });
 
   // Tear down the auth UI 1s after IM appears — same delay the legacy
   // `pageIm.onFirstMount` used so the cross-fade looks right.
