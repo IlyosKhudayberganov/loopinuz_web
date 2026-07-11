@@ -1,59 +1,74 @@
 {
-    "name": "Loopinuz Web",
+    "name": "Loopinuz",
     "short_name": "Loopinuz",
-    "start_url": "./",
     "description": "Loopinuz - messaging app with a focus on security and speed.",
+    "start_url": ".",
+    "scope": ".",
+    "id": "/",
+    "orientation": "portrait-primary",
+    "categories": ["social", "messaging"],
     "icons": [
         {
             "src": "assets/img/android-chrome-36x36.png?v=jw3mK7G9Ry",
             "sizes": "36x36",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "assets/img/android-chrome-48x48.png?v=jw3mK7G9Ry",
             "sizes": "48x48",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "assets/img/android-chrome-72x72.png?v=jw3mK7G9Ry",
             "sizes": "72x72",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "assets/img/android-chrome-96x96.png?v=jw3mK7G9Ry",
             "sizes": "96x96",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "assets/img/android-chrome-144x144.png?v=jw3mK7G9Ry",
             "sizes": "144x144",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "assets/img/android-chrome-192x192.png?v=jw3mK7G9Ry",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
             "src": "assets/img/android-chrome-256x256.png?v=jw3mK7G9Ry",
             "sizes": "256x256",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "assets/img/android-chrome-384x384.png?v=jw3mK7G9Ry",
             "sizes": "384x384",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "assets/img/android-chrome-512x512.png?v=jw3mK7G9Ry",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ],
-    "screenshots" : [{
+    "screenshots": [{
         "src": "assets/img/screenshot.jpg",
         "sizes": "1280x910",
-        "type": "image/jpeg"
+        "type": "image/jpeg",
+        "form_factor": "wide",
+        "label": "Loopinuz web interface"
     }],
     "share_target": {
         "action": "./share/",
@@ -72,5 +87,12 @@
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
     "display": "standalone",
+    "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
     "gcm_sender_id": "122867383838"
 }
