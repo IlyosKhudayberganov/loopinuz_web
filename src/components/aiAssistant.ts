@@ -110,18 +110,46 @@ async function queryMistral(query: string, context: GatheredContext): Promise<st
 export function createAIAssistantPanel() {
   const container = document.createElement('div');
   container.classList.add('ai-assistant-panel');
-  container.innerHTML = `
-    <div class="ai-assistant-header">
-      <span class="ai-assistant-title">AI Assistant</span>
-      <span class="ai-assistant-subtitle">Loopinuz AI powered by Mistral</span>
-      <button class="ai-assistant-close btn-icon">${Icon('close')}</button>
-    </div>
-    <div class="ai-assistant-messages"></div>
-    <div class="ai-assistant-input-area">
-      <input class="ai-assistant-input" type="text" placeholder="Ask about your chats..." />
-      <button class="ai-assistant-send btn-icon">${Icon('send')}</button>
-    </div>
-  `;
+
+  const header = document.createElement('div');
+  header.classList.add('ai-assistant-header');
+
+  const headerTexts = document.createElement('div');
+  headerTexts.classList.add('ai-assistant-header-texts');
+
+  const title = document.createElement('span');
+  title.classList.add('ai-assistant-title');
+  title.textContent = 'AI Assistant';
+
+  const subtitle = document.createElement('span');
+  subtitle.classList.add('ai-assistant-subtitle');
+  subtitle.textContent = 'Loopinuz AI powered by Mistral';
+
+  headerTexts.append(title, subtitle);
+
+  const closeBtn = document.createElement('button');
+  closeBtn.classList.add('ai-assistant-close', 'btn-icon');
+  closeBtn.textContent = '✕';
+
+  header.append(headerTexts, closeBtn);
+
+  const messagesEl = document.createElement('div');
+  messagesEl.classList.add('ai-assistant-messages');
+
+  const inputArea = document.createElement('div');
+  inputArea.classList.add('ai-assistant-input-area');
+
+  const inputEl = document.createElement('input');
+  inputEl.classList.add('ai-assistant-input');
+  inputEl.type = 'text';
+  inputEl.placeholder = 'Ask about your chats...';
+
+  const sendBtn = document.createElement('button');
+  sendBtn.classList.add('ai-assistant-send', 'btn-icon');
+  sendBtn.textContent = '➤';
+
+  inputArea.append(inputEl, sendBtn);
+  container.append(header, messagesEl, inputArea);
 
   const messagesEl = container.querySelector('.ai-assistant-messages') as HTMLElement;
   const inputEl = container.querySelector('.ai-assistant-input') as HTMLInputElement;

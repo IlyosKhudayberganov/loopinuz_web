@@ -1,0 +1,14 @@
+{
+  "buildCommand": "pnpm run generate-changelog && vite build && node copy-public-assets.js",
+  "outputDirectory": "dist",
+  "framework": null,
+  "installCommand": "pnpm install",
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    }
+  ]
+}

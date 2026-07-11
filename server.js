@@ -13,7 +13,7 @@ const useHttp = process.argv[4] !== 'https';
 const publicFolderName = thirdTour ? 'public3' : 'public';
 const port = forcePort ? +forcePort : (thirdTour ? 8443 : 80);
 
-const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || '1yTniRmoGx0V0BZfIKJkwMgIIY7j0NeZ';
+const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY;
 
 app.set('etag', false);
 app.use((req, res, next) => {
