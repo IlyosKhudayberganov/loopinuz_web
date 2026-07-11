@@ -87,10 +87,7 @@
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
     "display": "standalone",
-    "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-    "edge_side_panel": {
-        "preferred_width": 400
-    },
+    "display_override": ["standalone"],
     "launch_handler": {
         "client_mode": "navigate-existing"
     },
