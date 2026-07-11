@@ -2,8 +2,9 @@ import {IS_MOBILE} from '@environment/userAgent';
 import ripple from '@components/ripple';
 import {attachClickEvent} from '@helpers/dom/clickEvent';
 import mediaSizes from '@helpers/mediaSizes';
+import {createAIAssistantPanel} from '@components/aiAssistant';
 
-export type BottomNavTab = 'chats' | 'contacts' | 'settings' | 'profile';
+export type BottomNavTab = 'chats' | 'contacts' | 'settings' | 'profile' | 'ai';
 
 class BottomNav {
   private container: HTMLDivElement;
@@ -33,6 +34,7 @@ class BottomNav {
     const tabs: {id: BottomNavTab; icon: string; label: string}[] = [
       {id: 'chats', icon: 'message', label: 'Chats'},
       {id: 'contacts', icon: 'user', label: 'Contacts'},
+      {id: 'ai', icon: 'bot_filled', label: 'AI'},
       {id: 'settings', icon: 'settings', label: 'Settings'},
       {id: 'profile', icon: 'person', label: 'Profile'}
     ];
@@ -115,6 +117,9 @@ class BottomNav {
       case 'contacts':
         this.showContacts(appSidebarLeft, LEFT_COLUMN_ACTIVE_CLASSNAME);
         break;
+      case 'ai':
+        this.showAI();
+        break;
       case 'settings':
         this.showSettings(appSidebarLeft, LEFT_COLUMN_ACTIVE_CLASSNAME);
         break;
@@ -186,6 +191,20 @@ class BottomNav {
         peerId: rootScope.myId
       });
     }, 50);
+  }
+
+  private showAI() {
+    const overlay = document.createElement('div');
+    overlay.classList.add('ai-assistant-overlay');
+    overlay.append(createAIAssistantPanel());
+    document.body.append(overlay);
+    overlay.addEventListener('click', (e) => {
+      if(e.target === overlay) overlay.remove();
+    });
+
+    setTimeout(() => {
+      this.setActive('chats');
+    }, 300);
   }
 
   private onResize() {
