@@ -151,11 +151,6 @@ export function createAIAssistantPanel() {
   inputArea.append(inputEl, sendBtn);
   container.append(header, messagesEl, inputArea);
 
-  const messagesEl = container.querySelector('.ai-assistant-messages') as HTMLElement;
-  const inputEl = container.querySelector('.ai-assistant-input') as HTMLInputElement;
-  const sendBtn = container.querySelector('.ai-assistant-send') as HTMLElement;
-  const closeBtn = container.querySelector('.ai-assistant-close') as HTMLElement;
-
   function addMessage(text: string, role: 'user' | 'assistant') {
     const msg = document.createElement('div');
     msg.classList.add('ai-assistant-message', `ai-msg-${role}`);
