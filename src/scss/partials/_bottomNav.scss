@@ -1,0 +1,105 @@
+@use "../shared" as *;
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background-color: var(--surface-color);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  transition: transform 0.25s var(--transition-standard-easing), opacity 0.25s var(--transition-standard-easing);
+
+  &--hidden {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @include respond-to(not-handhelds) {
+    display: none !important;
+  }
+}
+
+.bottom-nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1;
+  height: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  color: var(--secondary-text-color);
+  position: relative;
+  padding: 6px 0 4px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.2s ease;
+
+  &--active {
+    color: var(--primary-color);
+
+    .bottom-nav-icon {
+      transform: scale(1.08);
+    }
+
+    .bottom-nav-label {
+      font-weight: var(--font-weight-bold);
+    }
+  }
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.bottom-nav-icon {
+  font-size: 22px;
+  line-height: 1;
+  transition: transform 0.2s var(--transition-standard-easing);
+}
+
+.bottom-nav-label {
+  font-size: 11px;
+  line-height: 1;
+  font-weight: var(--font-weight-normal);
+  white-space: nowrap;
+}
+
+.bottom-nav-badge {
+  position: absolute;
+  top: 4px;
+  right: 50%;
+  margin-right: -18px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background-color: var(--danger-color);
+  color: var(--badge-text-color);
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  line-height: 18px;
+  text-align: center;
+  pointer-events: none;
+  transform: scale(1);
+  transition: transform 0.2s var(--transition-standard-easing);
+}
+
+:root {
+  --bottom-nav-height: 56px;
+}
+
+@include respond-to(handhelds) {
+  body:not(.has-auth-pages) .page-chats {
+    padding-bottom: var(--bottom-nav-height);
+  }
+}
