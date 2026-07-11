@@ -83,7 +83,7 @@ class BottomNav {
       isDialog: false
     });
 
-    avatarContainer.append(avatar.element);
+    avatarContainer.append(avatar.node);
   }
 
   private bindEvents() {
