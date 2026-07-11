@@ -246,7 +246,29 @@ export function createAIAssistantPanel() {
     }
   });
 
-  addMessage('Salom! Men sizning Telegram chatlaringizni tahlil qila olaman. Chatlaringiz haqida istalgan narsa so\'rang.\n\nMasalan: "Akam bilan nima haqida yozishdik?" yoki "Kim menga salom yozdi?"', 'assistant');
+  addMessage('Salom! Men sizning Telegram chatlaringizni tahlil qila olaman.\n\nQuyidagi tugmalardan birini bosing yoki o\'zingiz savol yozing:', 'assistant');
+
+  const prompts = [
+    {text: 'Kim menga oxirgi xabar yozdi?', icon: '💬'},
+    {text: 'Akam bilan oxirgi 10 ta xabarni ko\'rsat', icon: '👨‍👦'},
+    {text: 'Do\'stlarim bilan nima haqida gaplashdik?', icon: '👥'}
+  ];
+
+  const promptsContainer = document.createElement('div');
+  promptsContainer.classList.add('ai-prompts-container');
+
+  for(const prompt of prompts) {
+    const btn = document.createElement('button');
+    btn.classList.add('ai-prompt-btn');
+    btn.textContent = `${prompt.icon} ${prompt.text}`;
+    attachClickEvent(btn, () => {
+      inputEl.value = prompt.text;
+      handleSend();
+    });
+    promptsContainer.append(btn);
+  }
+
+  messagesEl.append(promptsContainer);
 
   return container;
 }
