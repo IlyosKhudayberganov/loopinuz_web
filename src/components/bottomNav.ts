@@ -9,6 +9,7 @@ class BottomNav {
   private container: HTMLDivElement;
   private tabs: Map<BottomNavTab, HTMLButtonElement> = new Map();
   private badges: Map<BottomNavTab, HTMLSpanElement> = new Map();
+  private avatarContainers: Map<BottomNavTab, HTMLDivElement> = new Map();
   private activeTab: BottomNavTab = 'chats';
 
   constructor() {
@@ -25,6 +26,7 @@ class BottomNav {
     this.bindEvents();
     this.listenNotifications();
     this.setActive('chats');
+    this.loadProfileAvatar();
   }
 
   private render() {
@@ -40,8 +42,16 @@ class BottomNav {
       btn.classList.add('bottom-nav-tab');
       btn.dataset.tab = tab.id;
 
-      const icon = document.createElement('i');
-      icon.classList.add('tgico', `tgico-${tab.icon}`, 'bottom-nav-icon');
+      if(tab.id === 'profile') {
+        const avatarContainer = document.createElement('div');
+        avatarContainer.classList.add('bottom-nav-avatar');
+        btn.append(avatarContainer);
+        this.avatarContainers.set(tab.id, avatarContainer);
+      } else {
+        const icon = document.createElement('i');
+        icon.classList.add('tgico', `tgico-${tab.icon}`, 'bottom-nav-icon');
+        btn.append(icon);
+      }
 
       const label = document.createElement('span');
       label.classList.add('bottom-nav-label');
@@ -51,13 +61,29 @@ class BottomNav {
       badge.classList.add('bottom-nav-badge');
       badge.style.display = 'none';
 
-      btn.append(icon, label, badge);
+      btn.append(label, badge);
       ripple(btn);
       this.container.append(btn);
 
       this.tabs.set(tab.id, btn);
       this.badges.set(tab.id, badge);
     });
+  }
+
+  private async loadProfileAvatar() {
+    const {AvatarNew} = await import('@components/avatarNew');
+    const {default: rootScope} = await import('@lib/rootScope');
+
+    const avatarContainer = this.avatarContainers.get('profile');
+    if(!avatarContainer || !rootScope.myId) return;
+
+    const avatar = AvatarNew({
+      peerId: rootScope.myId,
+      size: 24,
+      isDialog: false
+    });
+
+    avatarContainer.append(avatar.element);
   }
 
   private bindEvents() {
@@ -93,7 +119,7 @@ class BottomNav {
         this.showSettings(appSidebarLeft, LEFT_COLUMN_ACTIVE_CLASSNAME);
         break;
       case 'profile':
-        this.showSettings(appSidebarLeft, LEFT_COLUMN_ACTIVE_CLASSNAME);
+        this.showProfile(appSidebarLeft, LEFT_COLUMN_ACTIVE_CLASSNAME, RIGHT_COLUMN_ACTIVE_CLASSNAME);
         break;
     }
   }
@@ -137,6 +163,28 @@ class BottomNav {
     const {AppSettingsTab} = await import('@components/solidJsTabs/tabs');
     setTimeout(() => {
       appSidebarLeft.createTab(AppSettingsTab).open();
+    }, 50);
+  }
+
+  private async showProfile(
+    appSidebarLeft: any,
+    LEFT_COLUMN_ACTIVE_CLASSNAME: string,
+    RIGHT_COLUMN_ACTIVE_CLASSNAME: string
+  ) {
+    const {default: appImManager} = await import('@lib/appImManager');
+    const {default: rootScope} = await import('@lib/rootScope');
+
+    if(!document.body.classList.contains(LEFT_COLUMN_ACTIVE_CLASSNAME)) {
+      document.body.classList.add(LEFT_COLUMN_ACTIVE_CLASSNAME);
+    }
+    if(mediaSizes.isMobile) {
+      document.body.classList.remove(RIGHT_COLUMN_ACTIVE_CLASSNAME);
+    }
+
+    setTimeout(() => {
+      appImManager.setPeer({
+        peerId: rootScope.myId
+      });
     }, 50);
   }
 

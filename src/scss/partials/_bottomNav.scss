@@ -51,6 +51,14 @@
       transform: scale(1.08);
     }
 
+    .bottom-nav-avatar {
+      transform: scale(1.08);
+
+      :global(.avatar) {
+        border-color: var(--primary-color);
+      }
+    }
+
     .bottom-nav-label {
       font-weight: var(--font-weight-bold);
     }
@@ -65,6 +73,35 @@
   font-size: 22px;
   line-height: 1;
   transition: transform 0.2s var(--transition-standard-easing);
+}
+
+.bottom-nav-avatar {
+  width: 26px;
+  height: 26px;
+  position: relative;
+  transition: transform 0.2s var(--transition-standard-easing);
+
+  :global(.avatar) {
+    width: 100%;
+    height: 100%;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    transition: border-color 0.2s ease;
+  }
+
+  :global(.avatar-element) {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  :global(.avatar-photo) {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+  }
 }
 
 .bottom-nav-label {
